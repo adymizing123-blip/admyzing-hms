@@ -1,0 +1,19 @@
+CarePlus HMS - final code (Supabase project: careplus-hms is already set up)
+
+1. Open .env.local and paste your Supabase Secret key after SUPABASE_SERVICE_ROLE_KEY=
+   (Supabase > Project Settings > API Keys > Secret keys > default > copy)
+2. Open a terminal in this folder and run:  npm install
+3. Then run:  npm run dev
+4. Open http://localhost:3000
+
+Test logins (change/delete before going live):
+  Admin    admin@careplus-hms.com    CpAdmin#7Kq29xVm
+  Staff    staff@careplus-hms.com    CpStaff#4Hn82wRt
+  Doctor   doctor@careplus-hms.com   CpDoctor#6Rt48yMk
+  Patient  patient@careplus-hms.com  CpPatient#9Zd35sLb
+
+Clinics: 7 clinics are set up (Main Campus + 6). Use the clinic dropdown at the top of the left menu to switch;
+  every page then shows only that clinic's data. Rx pad: Admin > Prescription Pad > click any text on the pad and type.
+
+Database: SQL files 01-08 are already applied on Supabase. Do NOT run them again.
+Still pending: supabase/09_automation_scheduler.sql (run after deploy, needs your live domain and CRON_SECRET).
