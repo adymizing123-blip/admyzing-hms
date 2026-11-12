@@ -29,7 +29,7 @@ function Appointments() {
   }, [date]);
 
   useEffect(() => {
-    supabase.from('doctors').select('id, full_name').order('full_name').then(({ data }) => setDoctors(data || []));
+    supabase.from('doctors').select('id, full_name').match(branchId ? { branch_id: branchId } : {}).order('full_name').then(({ data }) => setDoctors(data || []));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

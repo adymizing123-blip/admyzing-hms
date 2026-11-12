@@ -48,7 +48,7 @@ function IPD() {
   useEffect(() => { load(); }, [load]);
 
   useEffect(() => {
-    supabase.from('doctors').select('id, full_name').eq('active', true).order('full_name').then(({ data }) => setDoctors(data || []));
+    supabase.from('doctors').select('id, full_name').eq('active', true).match(branchId ? { branch_id: branchId } : {}).order('full_name').then(({ data }) => setDoctors(data || []));
     const pid = params.get('admit');
     if (pid) supabase.from('patients').select('id, first_name, last_name, mrn, phone').eq('id', pid).single().then(({ data }) => data && setPatient(data));
     // eslint-disable-next-line react-hooks/exhaustive-deps

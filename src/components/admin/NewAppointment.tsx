@@ -24,9 +24,13 @@ export default function NewAppointment({ open, onClose, onSaved, walkIn, presetP
 
   useEffect(() => {
     supabase.from('branches').select('id, name').eq('active', true).order('name').then(({ data }) => setClinics(data || []));
-    supabase.from('doctors').select('id, full_name, slot_minutes').eq('active', true).order('full_name').then(({ data }) => setDoctors(data || []));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    supabase.from('doctors').select('id, full_name, slot_minutes').eq('active', true).match(f.branch_id ? { branch_id: f.branch_id } : {}).order('full_name').then(({ data }) => setDoctors(data || []));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [f.branch_id]);
 
   useEffect(() => {
     if (!presetPatientId) return;
@@ -87,7 +91,7 @@ export default function NewAppointment({ open, onClose, onSaved, walkIn, presetP
         ) : <PatientPicker value={patient} onChange={setPatient} />}
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block"><span className="label">Clinic (where the patient came) *</span>
-            <select className="input" required value={f.branch_id} onChange={(e) => setF({ ...f, branch_id: e.target.value })}>
+            <select className="input" required value={f.branch_id} onChange={(e) => setF({ ...f, branch_id: e.target.value, doctor_id: '' })}>
               <option value="">Select clinic...</option>
               {clinics.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select></label>

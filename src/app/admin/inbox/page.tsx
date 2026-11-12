@@ -1,5 +1,6 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useBranch } from '@/components/admin/branch';
 import Link from 'next/link';
 import { Send, Check, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
@@ -8,6 +9,7 @@ import { cn, fmtDate, fmtDateTime } from '@/lib/utils';
 
 export default function Inbox() {
   const supabase = createClient();
+  const { branchId } = useBranch();
   const [tab, setTab] = useState('messages');
   const [threads, setThreads] = useState<any[]>([]);
   const [sel, setSel] = useState<any>(null);
@@ -28,7 +30,9 @@ export default function Inbox() {
   }, []);
 
   const loadThreads = useCallback(async () => {
-    const { data } = await supabase.from('patient_messages').select('patient_id, doctor_id, body, sender_type, read_by_staff_at, created_at, patients(first_name, last_name, mrn)').order('created_at', { ascending: false }).limit(500);
+    let tq = supabase.from('patient_messages').select('patient_id, doctor_id, body, sender_type, read_by_staff_at, created_at, patients!inner(first_name, last_name, mrn)').order('created_at', { ascending: false }).limit(500);
+    if (branchId) tq = tq.eq('patients.branch_id', branchId);
+    const { data } = await tq;
     const map = new Map<string, any>();
     (data || []).forEach((m: any) => {
       if (myDoctor && mine && m.doctor_id && m.doctor_id !== myDoctor) return;
@@ -50,7 +54,8 @@ export default function Inbox() {
   }, [loadThreads]);
 
   const loadRefills = useCallback(async () => {
-    let q = supabase.from('refill_requests').select('*, patients(id, first_name, last_name, mrn), doctors(full_name)').order('created_at', { ascending: false }).limit(100);
+    let q = supabase.from('refill_requests').select('*, patients!inner(id, first_name, last_name, mrn), doctors(full_name)').order('created_at', { ascending: false }).limit(100);
+    if (branchId) q = q.eq('patients.branch_id', branchId);
     if (myDoctor && mine) q = q.or(`doctor_id.eq.${myDoctor},doctor_id.is.null`);
     const { data } = await q;
     setRefills(data || []);

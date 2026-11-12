@@ -55,6 +55,8 @@ type Props = {
   reloadKey?: number;
   /** Only show rows of the current branch (table must have branch_id). */
   branchScoped?: boolean;
+  /** Show only rows whose related record (e.g. 'invoices', 'patients') belongs to the current branch. `select` must embed that relation. */
+  branchVia?: string;
 };
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -80,7 +82,7 @@ function fromInputValue(type: FieldDef['type'], v: any) {
 export default function ResourceManager({
   table, writeTable, title, subtitle, select = '*', columns, fields = [], searchColumns = [], orderBy = { column: 'created_at', ascending: false },
   filters, defaults = {}, canCreate = true, canEdit = true, canDelete = true, rowActions, headerActions, onRowClick,
-  pageSize = 25, embedded, reloadKey, branchScoped,
+  pageSize = 25, embedded, reloadKey, branchScoped, branchVia,
 }: Props) {
   const supabase = createClient();
   const { branchId } = useBranch();
@@ -99,8 +101,10 @@ export default function ResourceManager({
 
   const load = useCallback(async () => {
     setLoading(true);
-    let query = supabase.from(table).select(select, { count: 'exact' });
+    const viaOn = !!(branchVia && branchId && select.includes(`${branchVia}(`));
+    let query = supabase.from(table).select(viaOn ? select.replace(`${branchVia}(`, `${branchVia}!inner(`) : select, { count: 'exact' });
     if (branchScoped && branchId) query = query.eq('branch_id', branchId);
+    if (viaOn) query = query.eq(`${branchVia}.branch_id`, branchId);
     Object.entries(filters || {}).forEach(([k, v]) => {
       if (v !== undefined && v !== '' && v !== null) query = query.eq(k, v);
     });

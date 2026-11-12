@@ -6,11 +6,13 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { SourceBadge, SOURCE_OPTIONS } from '@/components/admin/ChannelBadge';
 import { age, fmtDate } from '@/lib/utils';
+import { useBranch } from '@/components/admin/branch';
 
 export default function Patients() {
   const router = useRouter();
   const [source, setSource] = useState('');
-  const [clinic, setClinic] = useState('');
+  const { branchId } = useBranch();
+  const [clinic, setClinic] = useState(branchId || '');
   const [clinics, setClinics] = useState<any[]>([]);
   useEffect(() => { createClient().from('branches').select('id, name').eq('active', true).order('name').then(({ data }) => setClinics(data || [])); }, []);
   return (

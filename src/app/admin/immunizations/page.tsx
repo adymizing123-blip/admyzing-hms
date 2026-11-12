@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useBranch } from '@/components/admin/branch';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import ResourceManager from '@/components/admin/ResourceManager';
@@ -9,6 +10,7 @@ import { fmtDate, todayISO } from '@/lib/utils';
 
 export default function Immunizations() {
   const supabase = createClient();
+  const { branchId } = useBranch();
   const [tab, setTab] = useState('due');
   const [due, setDue] = useState<any[]>([]);
 
@@ -16,7 +18,9 @@ export default function Immunizations() {
     if (tab !== 'due') return;
     (async () => {
       const soon = new Date(Date.now() + 30 * 864e5).toISOString().slice(0, 10);
-      const { data } = await supabase.from('immunizations').select('*, patients(id, first_name, last_name, mrn, phone), vaccines(name)').not('next_due_on', 'is', null).lte('next_due_on', soon).order('next_due_on');
+      let dq = supabase.from('immunizations').select('*, patients!inner(id, first_name, last_name, mrn, phone), vaccines(name)').not('next_due_on', 'is', null).lte('next_due_on', soon).order('next_due_on');
+      if (branchId) dq = dq.eq('patients.branch_id', branchId);
+      const { data } = await dq;
       const { data: all } = await supabase.from('immunizations').select('patient_id, vaccine_id, given_on');
       // a due dose is done if a later dose of the same vaccine was given
       setDue((data || []).filter((d) => !(all || []).some((a) => a.patient_id === d.patient_id && a.vaccine_id === d.vaccine_id && a.given_on > d.given_on)));
@@ -44,7 +48,7 @@ export default function Immunizations() {
         </div>
       )}
       {tab === 'given' && (
-        <ResourceManager embedded table="immunizations" title="Immunizations" select="*, patients(first_name, last_name, mrn), vaccines(name)" orderBy={{ column: 'given_on', ascending: false }}
+        <ResourceManager embedded table="immunizations" branchVia="patients" title="Immunizations" select="*, patients(first_name, last_name, mrn), vaccines(name)" orderBy={{ column: 'given_on', ascending: false }}
           columns={[
             { key: 'given_on', label: 'Date', render: (r) => fmtDate(r.given_on) },
             { key: 'patient', label: 'Patient', render: (r) => <span className="font-semibold">{r.patients?.first_name} {r.patients?.last_name}</span> },

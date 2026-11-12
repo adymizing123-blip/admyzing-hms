@@ -32,7 +32,8 @@ export default function Shell({ role, name, children, idleMinutes = 15, branches
     const sb = createClient();
     const { data: { user } } = await sb.auth.getUser();
     await sb.from('profiles').update({ branch_id: id }).eq('id', user!.id);
-    router.refresh();
+    // full reload: every tab (and its saved filters) starts again for the chosen clinic
+    window.location.reload();
   };
 
   const isActive = (href: string) =>

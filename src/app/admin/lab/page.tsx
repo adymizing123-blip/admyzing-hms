@@ -38,7 +38,7 @@ function Lab() {
   useEffect(() => { if (tab === 'pending' || tab === 'done') load(); }, [load, tab]);
   useEffect(() => {
     supabase.from('lab_tests').select('*').eq('active', true).order('name').then(({ data }) => setTests(data || []));
-    supabase.from('doctors').select('id, full_name').order('full_name').then(({ data }) => setDoctors(data || []));
+    supabase.from('doctors').select('id, full_name').match(branchId ? { branch_id: branchId } : {}).order('full_name').then(({ data }) => setDoctors(data || []));
     const pid = params.get('new');
     if (pid) supabase.from('patients').select('id, first_name, last_name, mrn, phone').eq('id', pid).single().then(({ data }) => data && setPatient(data));
     // eslint-disable-next-line react-hooks/exhaustive-deps

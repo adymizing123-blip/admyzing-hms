@@ -39,7 +39,7 @@ export default function Billing() {
       )}
 
       {tab === 'payments' && (
-        <ResourceManager embedded table="payments" title="Payments" select="*, invoices(invoice_no, patients(first_name, last_name))" canCreate={false} canEdit={false} canDelete={false}
+        <ResourceManager embedded table="payments" branchVia="invoices" title="Payments" select="*, invoices(invoice_no, patients(first_name, last_name))" canCreate={false} canEdit={false} canDelete={false}
           columns={[
             { key: 'created_at', label: 'Date', render: (r) => fmtDate(r.created_at) },
             { key: 'invoice', label: 'Invoice', render: (r) => <Link href={`/admin/billing/${r.invoice_id}`} className="font-semibold text-brand-700">{r.invoices?.invoice_no}</Link> },
@@ -52,7 +52,7 @@ export default function Billing() {
       )}
 
       {tab === 'claims' && (
-        <ResourceManager embedded table="insurance_claims" title="Claims" select="*, invoices(invoice_no)" searchColumns={['provider', 'claim_no', 'member_id']}
+        <ResourceManager embedded table="insurance_claims" branchVia="invoices" title="Claims" select="*, invoices(invoice_no)" searchColumns={['provider', 'claim_no', 'member_id']}
           onRowClick={(r) => router.push(`/admin/billing/claims/${r.id}`)}
           columns={[
             { key: 'created_at', label: 'Submitted', render: (r) => fmtDate(r.created_at) },
@@ -73,7 +73,7 @@ export default function Billing() {
       )}
 
       {tab === 'expenses' && (
-        <ResourceManager embedded table="expenses" title="Expenses" orderBy={{ column: 'spent_on', ascending: false }} searchColumns={['category', 'description']}
+        <ResourceManager embedded table="expenses" branchScoped title="Expenses" orderBy={{ column: 'spent_on', ascending: false }} searchColumns={['category', 'description']}
           columns={[
             { key: 'spent_on', label: 'Date', render: (r) => fmtDate(r.spent_on) },
             { key: 'category', label: 'Category', render: (r) => <span className="font-semibold">{r.category}</span> },

@@ -12,6 +12,9 @@ Test logins (change/delete before going live):
   Doctor   doctor@careplus-hms.com   CpDoctor#6Rt48yMk
   Patient  patient@careplus-hms.com  CpPatient#9Zd35sLb
 
+Clinic switch: choosing a clinic in the left menu reloads the page; Appointments, Patients, Pharmacy (stock, sales, returns, POs),
+  Billing (invoices, payments, claims, expenses), Lab, IPD, OT, Blood bank, Inventory, HR (staff, attendance, payroll), Inbox and Referrals
+  then show only that clinic. Master lists (medicine catalog, suppliers, vaccines, lab tests) stay shared.
 Clinics: 7 clinics are set up (Main Campus + 6). Use the clinic dropdown at the top of the left menu to switch;
   every page then shows only that clinic's data. Rx pad: Admin > Prescription Pad > click any text on the pad and type.
 

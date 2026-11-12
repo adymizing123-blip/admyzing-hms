@@ -29,6 +29,9 @@ const EDIT_CSS = `[data-ph]:empty::before{content:attr(data-ph);color:#94a3b8;fo
 [contenteditable=true]:hover{background:rgba(250,204,21,.18)}
 [contenteditable=true]:focus{background:rgba(250,204,21,.28);outline:none}`;
 
+const ruled = (unit = '1.8em', color = '#cbd5e1') =>
+  `repeating-linear-gradient(to bottom, transparent 0, transparent calc(${unit} - 1px), ${color} calc(${unit} - 1px), ${color} ${unit})`;
+
 /** Plain text on the printed copy; click-to-type text on the screen copy. */
 function Ed({ value, onCommit, ph, multi, style }: { value?: string; onCommit?: (v: string) => void; ph?: string; multi?: boolean; style?: CSSProperties }) {
   if (!onCommit) return <span style={style}>{value}</span>;
@@ -96,14 +99,14 @@ function RxBody({ d, cfg, color, edit }: { d: PadData; cfg: PadConfig; color: st
   const items = (d.items || []).filter((i) => i.medicine_name?.trim());
   const freeText = d.rxText !== undefined;
   const advHead = <p style={{ fontWeight: 700, color, fontSize: '0.75em', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Advice</p>;
+  const writeStyle: CSSProperties = { fontSize: '0.95em', lineHeight: '1.8em', flex: 1, minHeight: '16em', backgroundImage: ruled() };
   return (
-    <div>
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
       {cfg.show_rx_symbol && <p style={{ fontSize: '2.4em', fontWeight: 700, color, fontFamily: 'Georgia, serif', lineHeight: 1, marginBottom: '0.3em' }}>℞</p>}
       {freeText ? (
-        edit ? <Ed multi value={d.rxText} onCommit={(v) => edit.data({ rxText: v })} ph="Write medicines here: name, dose, how often, for how many days"
-                 style={{ fontSize: '0.95em', lineHeight: 1.6, minHeight: '16em' }} />
-        : d.rxText?.trim() ? <p style={{ whiteSpace: 'pre-wrap', fontSize: '0.95em', lineHeight: 1.6 }}>{d.rxText}</p>
-        : <Lines n={10} />
+        edit ? <Ed multi value={d.rxText} onCommit={(v) => edit.data({ rxText: v })} ph="Write medicines and instructions here. This whole area is for writing." style={writeStyle} />
+        : d.rxText?.trim() ? <p style={{ whiteSpace: 'pre-wrap', fontSize: '0.95em', lineHeight: '1.8em', flex: 1 }}>{d.rxText}</p>
+        : <div style={{ ...exact, flex: 1, minHeight: '16em', backgroundImage: ruled() }} />
       ) : (
         <ol style={{ listStyle: 'decimal', paddingLeft: '1.4em', margin: 0 }}>
           {items.map((r, i) => (
@@ -117,11 +120,12 @@ function RxBody({ d, cfg, color, edit }: { d: PadData; cfg: PadConfig; color: st
       )}
       {edit ? (
         <div style={{ marginTop: '1.2em', fontSize: '0.9em' }}>{advHead}
-          <Ed multi value={d.advice} onCommit={(v) => edit.data({ advice: v })} ph="Advice / instructions for the patient" style={{ lineHeight: 1.45, minHeight: '5em' }} /></div>
+          <Ed multi value={d.advice} onCommit={(v) => edit.data({ advice: v })} ph="Instructions for the patient (diet, rest, when to come back)"
+            style={{ lineHeight: '1.8em', minHeight: '5.4em', backgroundImage: ruled() }} /></div>
       ) : d.advice?.trim() ? (
         <div style={{ marginTop: '1.2em', fontSize: '0.9em' }}>{advHead}<p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.45 }}>{d.advice}</p></div>
       ) : freeText ? (
-        <div style={{ marginTop: '1.2em', fontSize: '0.9em' }}>{advHead}<Lines n={3} /></div>
+        <div style={{ marginTop: '1.2em', fontSize: '0.9em' }}>{advHead}<div style={{ ...exact, minHeight: '5.4em', backgroundImage: ruled() }} /></div>
       ) : null}
     </div>
   );
@@ -130,7 +134,7 @@ function RxBody({ d, cfg, color, edit }: { d: PadData; cfg: PadConfig; color: st
 function Signature({ d, cfg, edit }: { d: PadData; cfg: PadConfig; edit?: PadEdit }) {
   if (!cfg.show_signature) return null;
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', fontSize: '0.78em', color: '#475569', marginTop: '2em' }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', fontSize: '0.78em', color: '#475569', marginTop: '2em', marginBottom: '1.4em' }}>
       <div style={{ width: '40%', borderTop: '1px solid #64748b', paddingTop: '0.3em' }}>Next visit{d.followUp || edit ? ': ' : ''}<Ed value={d.followUp || ''} onCommit={edit ? (v) => edit.data({ followUp: v }) : undefined} ph="date" /></div>
       <div style={{ width: '40%', borderTop: '1px solid #64748b', paddingTop: '0.3em', textAlign: 'right' }}>Signature &amp; stamp</div>
     </div>
@@ -203,10 +207,10 @@ export function RxPadSheet({ cfg, data, edit }: { cfg: PadConfig; data: PadData;
           {leftCol(true)}
         </div>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ padding: '2em 2em 0' }}>
+          <div style={{ padding: '2em 2em 0', flex: 1, display: 'flex', flexDirection: 'column' }}>
             <div style={{ marginBottom: '1.4em' }}><ClinicBlock d={data} cfg={cfg} color={color} /></div>
             {cfg.show_patient_line && <PatientLine d={data} color={color} edit={edit} />}
-            <RxBody d={data} cfg={cfg} color={color} edit={edit} />
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}><RxBody d={data} cfg={cfg} color={color} edit={edit} /></div>
             <Signature d={data} cfg={cfg} edit={edit} />
           </div>
           <div style={{ marginTop: 'auto', padding: '0.8em 2em', fontSize: '0.75em', color: '#475569', borderTop: `1px solid ${color}55` }}>
@@ -243,11 +247,11 @@ export function RxPadSheet({ cfg, data, edit }: { cfg: PadConfig; data: PadData;
       {edit && <style>{EDIT_CSS}</style>}
       {wm}
       {header}
-      <div style={{ padding: '1.2em 2.2em 0', flex: 1 }}>
+      <div style={{ padding: '1.2em 2.2em 0', flex: 1, display: 'flex', flexDirection: 'column' }}>
         {cfg.show_patient_line && <PatientLine d={data} color={color} edit={edit} />}
-        <div style={{ display: 'flex', gap: '1.4em' }}>
+        <div style={{ display: 'flex', gap: '1.4em', flex: 1 }}>
           <div style={{ width: '28%', borderRight: '1px solid #cbd5e1', paddingRight: '1em' }}>{leftCol(false)}</div>
-          <div style={{ flex: 1 }}><RxBody d={data} cfg={cfg} color={color} edit={edit} /></div>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}><RxBody d={data} cfg={cfg} color={color} edit={edit} /></div>
         </div>
         <Signature d={data} cfg={cfg} edit={edit} />
       </div>

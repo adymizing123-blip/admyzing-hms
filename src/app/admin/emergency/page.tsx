@@ -44,7 +44,7 @@ export default function Emergency() {
 
   useEffect(() => {
     load();
-    supabase.from('doctors').select('id, full_name').eq('active', true).order('full_name').then(({ data }) => setDoctors(data || []));
+    supabase.from('doctors').select('id, full_name').eq('active', true).match(branchId ? { branch_id: branchId } : {}).order('full_name').then(({ data }) => setDoctors(data || []));
     const ch = supabase.channel('er-board').on('postgres_changes', { event: '*', schema: 'public', table: 'er_visits' }, () => load()).subscribe();
     const t = setInterval(() => tick((x) => x + 1), 30000);
     return () => { supabase.removeChannel(ch); clearInterval(t); };

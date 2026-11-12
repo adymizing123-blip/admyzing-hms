@@ -97,7 +97,7 @@ export default function Pharmacy() {
       )}
 
       {tab === 'po' && (
-        <ResourceManager embedded table="purchase_orders" title="Purchase orders" reloadKey={reload}
+        <ResourceManager embedded table="purchase_orders" branchScoped title="Purchase orders" reloadKey={reload}
           select="*, suppliers(name), purchase_order_items(quantity, unit_cost, medicines(name))"
           headerActions={null}
           columns={[
@@ -139,7 +139,7 @@ export default function Pharmacy() {
       )}
 
       {tab === 'returns' && (
-        <ResourceManager embedded table="pharmacy_returns" title="Returns" select="*, pharmacy_sales(sale_no), pharmacy_return_items(quantity, restocked, pharmacy_sale_items(medicines(name))), profiles(full_name)" canCreate={false} canEdit={false} canDelete={false}
+        <ResourceManager embedded table="pharmacy_returns" branchVia="pharmacy_sales" title="Returns" select="*, pharmacy_sales(sale_no), pharmacy_return_items(quantity, restocked, pharmacy_sale_items(medicines(name))), profiles(full_name)" canCreate={false} canEdit={false} canDelete={false}
           searchColumns={['return_no', 'reason']}
           columns={[
             { key: 'return_no', label: 'Return', render: (r) => <span className="font-semibold">{r.return_no}</span> },

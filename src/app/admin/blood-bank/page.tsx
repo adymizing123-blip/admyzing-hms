@@ -91,7 +91,7 @@ export default function BloodBank() {
       )}
 
       {tab === 'requests' && (
-        <ResourceManager embedded table="blood_requests" title="Transfusion requests" select="*, patients(first_name, last_name, mrn)" reloadKey={reload}
+        <ResourceManager embedded table="blood_requests" branchVia="patients" title="Transfusion requests" select="*, patients(first_name, last_name, mrn)" reloadKey={reload}
           columns={[
             { key: 'request_no', label: 'Request', render: (r) => <div><p className="font-semibold">{r.request_no}</p><p className="text-xs text-ink-muted">{fmtDateTime(r.created_at)}</p></div> },
             { key: 'patient', label: 'Patient', render: (r) => `${r.patients?.first_name} ${r.patients?.last_name}` },

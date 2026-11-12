@@ -19,7 +19,7 @@ export default function OPDQueue() {
 
   useEffect(() => {
     (async () => {
-      const { data: docs } = await supabase.from('doctors').select('id, full_name, profile_id').eq('active', true).order('full_name');
+      const { data: docs } = await supabase.from('doctors').select('id, full_name, profile_id').eq('active', true).match(branchId ? { branch_id: branchId } : {}).order('full_name');
       setDoctors(docs || []);
       const { data: { user } } = await supabase.auth.getUser();
       const mine = docs?.find((d) => d.profile_id === user?.id);

@@ -33,7 +33,7 @@ export default function Inventory() {
         />
       )}
       {tab === 'moves' && (
-        <ResourceManager embedded table="inventory_transactions" title="Stock movements" select="*, inventory_items(name, unit), departments(name)" canEdit={false} canDelete={false}
+        <ResourceManager embedded table="inventory_transactions" branchVia="inventory_items" title="Stock movements" select="*, inventory_items(name, unit), departments(name)" canEdit={false} canDelete={false}
           reloadKey={reload}
           columns={[
             { key: 'created_at', label: 'Date', render: (r) => fmtDateTime(r.created_at) },

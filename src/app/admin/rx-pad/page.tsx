@@ -6,6 +6,7 @@ import { Alert, Field, PageHeader, Spinner } from '@/components/ui';
 import { RxPadPrintable, type PadData, type PadEdit } from '@/components/admin/RxPad';
 import { PAD_COLORS, clinicInfo, mergePad, type PadConfig, type PadDesign } from '@/lib/rx-pad';
 import { cn, fmtDate } from '@/lib/utils';
+import { useBranch } from '@/components/admin/branch';
 
 const DESIGNS: { id: PadDesign; label: string }[] = [
   { id: 'classic', label: 'Classic' }, { id: 'modern', label: 'Modern band' }, { id: 'side', label: 'Side panel' }, { id: 'minimal', label: 'Minimal' },
@@ -13,6 +14,7 @@ const DESIGNS: { id: PadDesign; label: string }[] = [
 
 export default function RxPadSettings() {
   const supabase = createClient();
+  const { branchId } = useBranch();
   const [doctors, setDoctors] = useState<any[]>([]);
   const [mineId, setMineId] = useState<string | null>(null);
   const [doctorId, setDoctorId] = useState('');
@@ -56,7 +58,7 @@ export default function RxPadSettings() {
       const base = mergePad(s?.config);
       setCfg({ ...base, qualifications: base.qualifications || d?.qualification || '', speciality: base.speciality || d?.specialty || '' });
       setClinics(br || []);
-      setClinicId((prev) => prev || (br || [])[0]?.id || '');
+      setClinicId((prev) => prev || ((br || []).some((b) => b.id === branchId) ? branchId! : (br || [])[0]?.id || ''));
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [doctorId]);

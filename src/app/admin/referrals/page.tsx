@@ -32,7 +32,7 @@ function Referrals() {
     <div>
       <PageHeader title="Referrals" subtitle="Refer patients between your doctors or to outside specialists, then book the visit." />
       <Tabs value={tab} onChange={setTab} tabs={[...(myDoctor ? [{ id: 'incoming', label: 'Referred to me' }, { id: 'outgoing', label: 'My referrals' }] : []), { id: 'pending', label: 'Pending' }, { id: 'all', label: 'All' }]} />
-      <ResourceManager embedded table="referrals" title="Referrals" filters={filters} reloadKey={reload}
+      <ResourceManager embedded table="referrals" branchVia="patients" title="Referrals" filters={filters} reloadKey={reload}
         select="*, patients(id, first_name, last_name, mrn), from:doctors!referrals_from_doctor_id_fkey(full_name), to:doctors!referrals_to_doctor_id_fkey(full_name)"
         columns={[
           { key: 'created_at', label: 'Date', render: (r) => fmtDate(r.created_at) },

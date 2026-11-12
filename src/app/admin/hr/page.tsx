@@ -1,5 +1,6 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
+import { useBranch } from '@/components/admin/branch';
 import { LogIn, LogOut } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import ResourceManager from '@/components/admin/ResourceManager';
@@ -45,7 +46,7 @@ export default function HR() {
       {tab === 'attendance' && <Attendance />}
 
       {tab === 'shifts' && (
-        <ResourceManager embedded table="shifts" title="Duty roster" select="*, staff(full_name, role)" orderBy={{ column: 'shift_date', ascending: false }}
+        <ResourceManager embedded table="shifts" branchVia="staff" title="Duty roster" select="*, staff(full_name, role)" orderBy={{ column: 'shift_date', ascending: false }}
           columns={[
             { key: 'shift_date', label: 'Date', render: (r) => fmtDate(r.shift_date) },
             { key: 'staff', label: 'Staff', render: (r) => <span className="font-semibold">{r.staff?.full_name}</span> },
@@ -70,13 +71,14 @@ export default function HR() {
 
 function Attendance() {
   const supabase = createClient();
+  const { branchId } = useBranch();
   const [date, setDate] = useState(todayISO());
   const [staff, setStaff] = useState<any[]>([]);
   const [att, setAtt] = useState<Record<string, any>>({});
 
   const load = useCallback(async () => {
     const [{ data: s }, { data: a }] = await Promise.all([
-      supabase.from('staff').select('id, full_name, role').eq('active', true).order('full_name'),
+      supabase.from('staff').select('id, full_name, role').eq('active', true).match(branchId ? { branch_id: branchId } : {}).order('full_name'),
       supabase.from('attendance').select('*').eq('work_date', date),
     ]);
     setStaff(s || []);
@@ -123,13 +125,16 @@ function Attendance() {
 
 function Payroll() {
   const supabase = createClient();
+  const { branchId } = useBranch();
   const [month, setMonth] = useState(todayISO().slice(0, 7));
   const [rows, setRows] = useState<any[]>([]);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
 
   const load = useCallback(async () => {
-    const { data } = await supabase.from('payroll').select('*, staff(full_name, role, pay_type)').eq('period_start', `${month}-01`).order('net_pay', { ascending: false });
+    let pq = supabase.from('payroll').select('*, staff!inner(full_name, role, pay_type)').eq('period_start', `${month}-01`).order('net_pay', { ascending: false });
+    if (branchId) pq = pq.eq('staff.branch_id', branchId);
+    const { data } = await pq;
     setRows(data || []);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [month]);
